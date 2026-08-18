@@ -1,0 +1,12 @@
+package com.quickbite.repository;
+
+import com.quickbite.entity.Cart;
+import com.quickbite.entity.User;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.Optional;
+
+public interface CartRepository extends JpaRepository<Cart, Long> {
+    Optional<Cart> findByUser(User user);
+    Optional<Cart> findByUserId(Long userId);
+}
