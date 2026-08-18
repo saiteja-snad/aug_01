@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: quickbite-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: quickbite_db
+      POSTGRES_USER: quickbite
+      POSTGRES_PASSWORD: quickbite123
+    ports:
+      - "5432:5432"
+    volumes:
+      - quickbite-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U quickbite -d quickbite_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: quickbite-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: quickbite_db
+      DB_USER: quickbite
+      DB_PASSWORD: quickbite123
+      JWT_SECRET: QuickBiteSuperSecretKeyForJWTSigningMustBeAtLeast256BitsLong123456
+      JWT_EXPIRATION_MS: 86400000
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./logs:/app/logs
+
+volumes:
+  quickbite-pgdata:
